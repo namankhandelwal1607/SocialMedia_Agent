@@ -1,0 +1,6 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "social_media_graph": "./graph/graph.py:graph"
+  }
+}

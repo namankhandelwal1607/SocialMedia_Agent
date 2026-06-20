@@ -1,4 +1,5 @@
 from graph.state import SocialMediaState
+from langgraph.types import interrupt
 
 from agents.trend_agent import trend_agent
 from agents.knowledge_agent import knowledge_agent
@@ -224,4 +225,51 @@ Content:
 
     return {
         "compliance_review": review
+    }
+
+# def approval_node(state):
+
+#     print("\nGenerated Post:\n")
+
+#     print(state["generated_content"]["title"])
+#     print()
+#     print(state["generated_content"]["content"])
+
+#     approval = input(
+#         "\nApprove post? (yes/no): "
+#     )
+
+#     return {
+#         "human_approval":
+#         approval.lower() == "yes"
+#     }
+
+
+def approval_node(state):
+
+    approval = interrupt(
+        {
+            "title": state["generated_content"]["title"],
+            "content": state["generated_content"]["content"],
+            "hashtags": state["generated_content"]["hashtags"]
+        }
+    )
+
+    return {
+        "human_approval": approval
+    }
+
+
+def publish_node(state):
+
+    print("\n" + "="*50)
+    print("PUBLISH NODE")
+    print("="*50)
+
+    print("Publishing Content...")
+
+    print(state["generated_content"]["title"])
+
+    return {
+        "published": True
     }

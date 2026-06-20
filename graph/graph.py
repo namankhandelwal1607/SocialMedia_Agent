@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph
 from langgraph.graph import START, END
-
+from langgraph.checkpoint.memory import InMemorySaver
 from graph.state import SocialMediaState
 
 from graph.nodes import (
@@ -8,28 +8,43 @@ from graph.nodes import (
     knowledge_node,
     strategy_node,
     content_node,
-    compliance_node
+    compliance_node,
+    approval_node,
+    publish_node
 )
 
 def compliance_router(state):
 
     print("\n" + "="*50)
-    print("ROUTER CALLED")
+    print("COMPLIANCE ROUTER")
     print("="*50)
 
-    print("State Keys:")
-    print(state.keys())
+    review = state.get("compliance_review")
 
-    print("\nCompliance Review:")
-    print(state.get("compliance_review"))
+    if not review:
+        print("No compliance review found.")
+        return "revise"
 
-    if state["compliance_review"]["approved"]:
-        return "approved"
+    print("Approved:", review.get("approved"))
+    print("Risk Level:", review.get("risk_level"))
 
-    return "retry"
+    if review.get("approved", False):
+        print("Routing -> approval")
+        return "approval"
 
+    print("Routing -> revise")
+    return "revise"
+
+
+def approval_router(state):
+
+    if state["human_approval"]:
+        return "publish"
+
+    return "content"
 builder = StateGraph(SocialMediaState)
 
+# Nodes
 builder.add_node("trend", trend_node)
 
 builder.add_node("knowledge", knowledge_node)
@@ -40,6 +55,11 @@ builder.add_node("content", content_node)
 
 builder.add_node("compliance", compliance_node)
 
+builder.add_node("approval", approval_node)
+
+builder.add_node("publish", publish_node)
+
+# Main Flow
 builder.add_edge(START, "trend")
 
 builder.add_edge("trend", "knowledge")
@@ -50,14 +70,37 @@ builder.add_edge("strategy", "content")
 
 builder.add_edge("content", "compliance")
 
+# Conditional Routing
 builder.add_conditional_edges(
     "compliance",
     compliance_router,
     {
-        "approved": END,
-        "retry": "content"
+        "approval": "approval",
+        "revise": "content"
     }
 )
 
-graph = builder.compile()
+builder.add_conditional_edges(
+    "approval",
+    approval_router,
+    {
+        "publish": "publish",
+        "content": "content"
+    }
+)
+# Approval Flow
+builder.add_edge(
+    "approval",
+    "publish"
+)
 
+builder.add_edge(
+    "publish",
+    END
+)
+
+# memory = InMemorySaver()
+
+graph = builder.compile(
+    # checkpointer=memory
+)

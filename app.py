@@ -11,8 +11,16 @@ Target audience: CIOs, CTOs, and enterprise technology leaders.
     """
 }
 
-result = graph.invoke(initial_state)
+config = {
+    "configurable": {
+        "thread_id": "auriga-campaign"
+    }
+}
 
+result = graph.invoke(
+    initial_state,
+    config=config
+)
 print("\nCONTENT\n")
 
 print(result["generated_content"])
