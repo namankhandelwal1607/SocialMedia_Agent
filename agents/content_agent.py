@@ -109,7 +109,7 @@ CONTENT DISTRIBUTION
 
 CONTENT LENGTH
 
-- 220–350 words
+- 220-350 words
 - Multiple short paragraphs
 - Easy to read on LinkedIn
 
