@@ -82,7 +82,7 @@ Enterprise Challenge:
 What practical challenge are enterprises facing?
 
 Future Prediction:
-What is likely to happen over the next 2–5 years?
+What is likely to happen over the next 2-5 years?
 
 Angle:
 What perspective should the content take?
