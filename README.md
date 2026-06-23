@@ -1,66 +1,296 @@
-Phase 1: Project Setup
+# AI Social Media Content Operations Platform
 
-Since you're already using WSL, I recommend doing everything inside WSL.
+An AI-powered content operations platform built using **LangGraph**, **LangChain**, **RAG**, **Structured Outputs**, and **Human-in-the-Loop Approval**.
 
-Create Project
-mkdir auriga-social-ai
-cd auriga-social-ai
-Create Virtual Environment
-python3 -m venv venv
-source venv/bin/activate
-Install Core Dependencies
-pip install langgraph
-pip install langchain
-pip install langchain-openai
-pip install langchain-community
-pip install langchain-core
-pip install langsmith
+The platform automatically discovers trending AI topics, aligns them with company expertise, generates executive-level thought leadership content, performs compliance checks, and publishes approved content to Reddit.
 
-pip install tavily-python
-pip install beautifulsoup4
-pip install faiss-cpu
-pip install sentence-transformers
+---
 
-pip install fastapi
-pip install uvicorn
+# Overview
 
-pip install python-dotenv
-pip install pydantic
-Create Structure
-auriga-social-ai/
+Organizations often struggle to convert emerging industry trends into high-quality social media content that is both insightful and aligned with their expertise.
 
-├── agents/
-│   ├── supervisor.py
-│   ├── trend_agent.py
-│   ├── knowledge_agent.py
-│   ├── strategy_agent.py
-│   ├── content_agent.py
-│   ├── compliance_agent.py
-│
-├── tools/
-│   ├── web_search.py
-│   ├── rag_tool.py
-│
-├── data/
-│   ├── auriga_docs/
-│
-├── graph/
-│   ├── state.py
-│   ├── workflow.py
-│
-├── app.py
-├── .env
-└── requirements.txt
-Phase 2: Build Version 1 (Core Workflow)
+This project automates that workflow by combining:
 
-Don't build publishing, analytics, scheduling, Instagram, LinkedIn APIs initially.
+* Trend Discovery
+* Company Knowledge Retrieval
+* Content Strategy Generation
+* Content Creation
+* Compliance Validation
+* Human Approval
+* Automated Publishing
 
-Build this flow:
+The workflow is implemented using LangGraph and supports both:
 
-User
+1. Node-Based Architecture
+2. Agent-Based Architecture
+
+---
+
+# Features
+
+### Trend Discovery
+
+Discover emerging topics from:
+
+* Reddit
+* AI News Sources
+* Engineering Blogs
+
+### Retrieval-Augmented Generation (RAG)
+
+Retrieve relevant company knowledge using:
+
+* FAISS Vector Store
+* HuggingFace Embeddings
+* MMR Retrieval
+
+### Content Strategy Generation
+
+Generate:
+
+* Target Audience
+* Key Insight
+* Enterprise Challenge
+* Future Prediction
+* Content Angle
+* Call-To-Action
+
+### Executive-Level Content Generation
+
+Generate professional thought leadership content designed for business and technology audiences.
+
+### Compliance Review
+
+Validate generated content for:
+
+* Professional tone
+* Technical accuracy
+* Misleading claims
+* Exaggeration
+* Brand consistency
+
+### Human-in-the-Loop Approval
+
+Pause workflow execution using LangGraph Interrupts and require human approval before publishing.
+
+### Reddit Publishing
+
+Publish approved content directly to Reddit.
+
+---
+
+# Architecture
+
+## LangGraph Workflow
+
+![LangGraph Workflow](images/langgraph_workflow.png)
+
+## System Architecture
+
+![System Architecture](images/architecture.png)
+
+---
+
+# Workflow
+
+## 1. Trend Discovery
+
+The Trend Node gathers information from:
+
+* Reddit discussions
+* AI news articles
+* Technical blogs
+
+Tools:
+
+```python
+search_reddit()
+search_news()
+search_tech_blogs()
+```
+
+Output:
+
+```python
+trend_analysis
+```
+
+---
+
+## 2. Knowledge Retrieval (RAG)
+
+Relevant company knowledge is retrieved from an internal vector database.
+
+Technologies:
+
+* FAISS
+* HuggingFace Embeddings
+* MMR Retrieval
+
+Tool:
+
+```python
+auriga_search()
+```
+
+Output:
+
+```python
+company_context
+```
+
+---
+
+## 3. Content Strategy Generation
+
+Using:
+
+* Trend Analysis
+* Company Knowledge
+
+The workflow creates a structured content strategy.
+
+Output:
+
+```python
+strategy
+```
+
+---
+
+## 4. Content Generation
+
+Generates executive-level thought leadership content.
+
+Inputs:
+
+* trend_analysis
+* company_context
+* strategy
+
+Output:
+
+```python
+generated_content
+```
+
+---
+
+## 5. Compliance Review
+
+Reviews generated content for:
+
+* Professionalism
+* Technical correctness
+* Brand consistency
+* Risk level
+
+Output:
+
+```python
+compliance_review
+```
+
+---
+
+## 6. Human Approval
+
+Uses LangGraph Interrupts to pause execution and request human approval.
+
+Possible actions:
+
+* Approve
+* Request Changes
+
+If changes are requested:
+
+```text
+Content → Compliance → Approval
+```
+
+loop continues until approved.
+
+---
+
+## 7. Publishing
+
+After approval, content is automatically published to Reddit.
+
+Output:
+
+```python
+published = True
+```
+
+---
+
+# Supported Architectures
+
+This project supports two workflow implementations.
+
+## Node-Based Workflow (Recommended)
+
+Location:
+
+```text
+graph/nodes.py
+```
+
+Each stage is implemented as a dedicated LangGraph node.
+
+Benefits:
+
+* Explicit workflow control
+* Easier debugging
+* Deterministic execution
+* Better observability
+* Clear state transitions
+
+Workflow:
+
+```text
+Trend
  ↓
-Supervisor
+Knowledge
  ↓
+Strategy
+ ↓
+Content
+ ↓
+Compliance
+ ↓
+Approval
+ ↓
+Publish
+```
+
+---
+
+## Agent-Based Workflow
+
+Location:
+
+```text
+graph/nodesAgent.py
+```
+
+Each stage is implemented using a dedicated AI agent.
+
+Agents:
+
+```text
+Trend Agent
+Knowledge Agent
+Strategy Agent
+Content Agent
+Compliance Agent
+Publish Agent
+```
+
+Workflow:
+
+```text
 Trend Agent
  ↓
 Knowledge Agent
@@ -71,318 +301,249 @@ Content Agent
  ↓
 Compliance Agent
  ↓
-Output
+Approval
+ ↓
+Publish Agent
+```
 
-No human approval yet.
+This implementation demonstrates a multi-agent architecture where specialized agents collaborate to generate content.
 
-Goal:
+---
 
-Input:
+# State Management
 
-Find trending AI topics and generate a LinkedIn post.
+The workflow uses a centralized LangGraph state.
 
-Output:
+```python
+class SocialMediaState(TypedDict):
+    user_request: str
 
-Trending Topic:
-Multi-Agent Systems
-
-Auriga Angle:
-Enterprise AI Automation
-
-LinkedIn Post:
-...
-
-If this works, you've already demonstrated LangGraph multi-agent orchestration.
-
-Phase 3: Create State
-
-graph/state.py
-
-from typing import TypedDict
-
-class GraphState(TypedDict):
-    user_query: str
-
-    trend_data: str
+    trend_analysis: dict
 
     company_context: str
 
-    strategy: str
+    strategy: dict
 
-    generated_content: str
+    generated_content: dict
 
-    compliance_feedback: str
+    compliance_review: dict
 
-    final_output: str
+    human_approval: bool
 
-This alone demonstrates State Management.
+    published: bool
 
-Phase 4: Build Trend Discovery Agent
+    campaign_history: list
+```
 
-Create a web search tool.
+---
 
-Initially use Tavily.
+# Project Structure
 
-@tool
-def search_trends(query: str):
-    ...
+```text
+SocialMedia_Agent
+│
+├── agents/
+│   ├── trend_agent.py
+│   ├── knowledge_agent.py
+│   ├── strategy_agent.py
+│   ├── content_agent.py
+│   ├── compliance_agent.py
+│   └── publish_agent.py
+│
+├── nodes/
+│   ├── trend.py
+│   ├── knowledge.py
+│   ├── strategy.py
+│   ├── content.py
+│   └── compliance.py
+│
+├── graph/
+│   ├── graph.py
+│   ├── nodes.py
+│   ├── nodesAgent.py
+│   └── state.py
+│
+├── notebook/
+│   ├── 01_trend_agent.ipynb
+│   ├── 02_company_agent.ipynb
+│   ├── 03_content_strategy_agent.ipynb
+│   ├── 04_content_generation_agent.ipynb
+│   ├── 05_brand_compliance_agent.ipynb
+│   └── 06_langgraph_workflow.ipynb
+│
+├── vectorstore/
+│   └── auriga/
+│
+├── images/
+│
+├── app.py
+├── config.py
+├── langgraph.json
+├── requirements.txt
+└── README.md
+```
 
-Agent responsibility:
+---
 
-Input:
-Find trending AI topics
+# Directory Explanation
 
-Output:
-1. Agentic AI
-2. MCP
-3. AI Coding Agents
-4. Multi-Agent Systems
-Phase 5: Build Auriga Knowledge Agent
+## agents/
 
-Now implement RAG.
+Contains the original multi-agent implementation.
 
-Collect:
+Each file defines a specialized AI agent responsible for a specific stage of the workflow.
 
-Auriga website pages
-Blogs
-Service pages
+## nodes/
 
-Store them in:
+Contains tools, structured output schemas, retrieval logic, and reusable components used by the node-based workflow.
 
-data/auriga_docs/
+## graph/nodes.py
 
-Create:
+Node-based workflow implementation.
 
-FAISS
-Sentence Transformers
+Each workflow stage is represented as a dedicated LangGraph node.
 
-Pipeline:
+## graph/nodesAgent.py
 
-Documents
-↓
-Chunking
-↓
-Embeddings
-↓
-FAISS
-↓
-Retriever
+Agent-based workflow implementation.
 
-Agent retrieves relevant company information.
+Each stage invokes a specialized AI agent.
 
-Example:
+## graph/graph.py
 
-Trend:
-Agentic AI
+Defines:
 
-Retrieved:
-Auriga provides AI consulting,
-custom software solutions,
-digital transformation.
+* LangGraph workflow
+* Routing logic
+* Conditional edges
+* Human approval flow
+* Publishing flow
 
-Now you've demonstrated RAG.
+## graph/state.py
 
-Phase 6: Strategy Agent
+Defines the shared workflow state.
 
-Input:
+## vectorstore/
 
-Trend = Agentic AI
+Contains the FAISS knowledge base built from Auriga company information.
 
-Auriga Context = AI consulting
+## notebook/
 
-Output:
+Development notebooks used while building and testing each stage independently.
 
-Target Audience:
-CTOs
+## config.py
 
-Platform:
-LinkedIn
+Initializes:
 
-Angle:
-How enterprises can adopt
-multi-agent systems.
+* Gemini 2.5 Flash
+* Groq Llama 3.3 70B
+* Environment variables
+* API keys
 
-This is just an LLM node.
+## app.py
 
-Phase 7: Content Generation Agent
+Application entry point.
 
-Generate:
+## langgraph.json
 
-class SocialPost(BaseModel):
-    title: str
-    content: str
-    hashtags: list[str]
+Configuration file used by:
 
-Use structured output.
+```bash
+langgraph dev
+```
 
-Now you demonstrate:
+to visualize and test workflows in LangGraph Studio.
 
-Structured Output
-Pydantic Models
-Phase 8: Compliance Agent
+---
 
-Input:
+# Running the Project
 
-Generated Content
+Install dependencies:
 
-Check:
+```bash
+pip install -r requirements.txt
+```
 
-professionalism
-factual claims
-tone
+Run locally:
 
-Output:
+```bash
+python app.py
+```
 
-APPROVED
+Launch LangGraph Studio:
 
-or
+```bash
+langgraph dev
+```
 
-REVISE
+---
 
-Add conditional edge.
+# Tech Stack
 
-if approved:
-    END
+## AI Frameworks
 
-else:
-    Content Agent
+* LangGraph
+* LangChain
 
-Now you've demonstrated Conditional Routing.
+## Models
 
-Phase 9: Add Human Approval (Interrupts)
+* Gemini 2.5 Flash
+* Llama 3.3 70B (Groq)
 
-This is where LangGraph becomes impressive.
+## Retrieval
 
-Flow:
+* FAISS
+* HuggingFace Embeddings
+* MMR Search
 
-Content Agent
-↓
-Interrupt
-↓
-Human Review
-↓
-Resume Graph
+## Data Sources
 
-Example:
+* Tavily Search
+* Reddit
+* AI News
+* Technical Blogs
 
-from langgraph.types import interrupt
-feedback = interrupt(
-    {
-        "post": generated_post
-    }
-)
+## Publishing
 
-User can:
+* Reddit API (PRAW)
 
-approve
+---
 
-or
+# Example Request
 
-modify hashtags
+```text
+Create a thought-leadership post about Agentic AI adoption in enterprises.
+```
 
-Resume execution afterward.
+---
 
-This demonstrates:
+# Future Improvements
 
-Human-in-the-Loop
-Interrupts
-Checkpointing
-Phase 10: Add Memory
+* LinkedIn Publishing
+* Multi-Platform Publishing
+* Campaign Analytics
+* Engagement Tracking
+* Scheduled Publishing
+* Multi-Company Knowledge Bases
+* Campaign Memory
+* Historical Performance Analysis
 
-Store:
+---
 
-Previous Posts
-Brand Guidelines
-User Preferences
+# Key Learnings
 
-Use:
+This project demonstrates:
 
-MemorySaver()
+* LangGraph Workflow Orchestration
+* Multi-Agent Systems
+* Human-in-the-Loop AI
+* Retrieval-Augmented Generation (RAG)
+* Structured Outputs
+* Tool Calling
+* Conditional Routing
+* State Management
+* AI Content Operations
+* Enterprise Content Governance
 
-or
-
-Postgres Checkpointer
-
-Now the agent remembers:
-
-Don't use excessive emojis
-Prefer LinkedIn content
-Focus on AI topics
-Phase 11: Add Streaming
-
-Stream outputs while content is being generated.
-
-graph.stream(...)
-
-Show:
-
-Trend Agent Running...
-Knowledge Agent Running...
-Generating Content...
-
-This looks great during demos.
-
-Phase 12: Add Publishing Agent
-
-Only after everything above works.
-
-Create tools:
-
-post_to_linkedin()
-post_to_twitter()
-
-Initially mock them:
-
-Posted Successfully
-
-You don't need real LinkedIn/Twitter integration for the internship demo.
-
-Phase 13: Add Analytics Agent
-
-Simplified version:
-
-Store posts in SQLite.
-
-Post
-Date
-Platform
-Likes
-Comments
-Impressions
-
-Analytics Agent can answer:
-
-What topics perform best?
-
-using SQL queries.
-
-Recommended MVP
-
-If I were building this for a mentor demo, I'd stop after:
-
-✅ Supervisor Agent
-✅ Trend Agent
-✅ Knowledge Agent (RAG)
-✅ Strategy Agent
-✅ Content Agent
-✅ Compliance Agent
-✅ Human Approval Interrupt
-✅ MemorySaver Checkpointer
-✅ Streaming
-
-That already covers almost every major LangGraph concept and is more than enough for a strong internship project. After that, you can add publishing and analytics as bonus features.
-
-
-
-
-
-
-For this project:
-
-Agent	Model
-Trend Agent	Gemini
-Knowledge Agent	Gemini
-Strategy Agent	Groq
-Content Agent	Groq
-Compliance Agent	Groq
-Supervisor	Groq
+```
+```
